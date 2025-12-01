@@ -1,4 +1,4 @@
-# Risk-analysis-chatbot
+<img width="1627" height="1301" alt="image" src="https://github.com/user-attachments/assets/95860ace-faad-44ed-885e-d4468058dbb9" /># Risk-analysis-chatbot
 
 
 For the risk department of a financial company, types of risks involved include credit risk, counterparty risk, market risk, and others. Credit risk is primarily related to changes in the counterparty's credit, and the risk department needs to monitor daily changes in credit limiting. Counterparty risk and market risk are mainly associated with margin calls. Risk department must monitor the positions of counterparties daily, as well as price changes of the commodities they hold in the market, to determine whether margin calls are necessary. Additionally, there are many other risks specific to the company's business operations. A company may have numerous spreadsheets covering various aspects of its business. When someone unfamiliar with the company's operations, such as an intern, needs to find information or locate spreadsheets related to the company's business, they can only ask others or their mentors. Even for those who have been with the company for a long time, some details and rules can be easily forgotten.  
@@ -24,6 +24,10 @@ The framework for **account fund queries** is almost identical to the framework 
 ***
 
 Regarding the scheduled task query, it primarily involves extracting the content of corresponding rows from Excel files. It is important to note that the relevant rows in the Excel file may contain multiple subcategories, so we need to **standardize the Excel table** into a unified base format. I extract the keyword "定时任务" from the user's query, retrieve the daily-updated database status table, and then filter the scheduled task table based on the extracted keywords.
+
+
+<img width="1627" height="1301" alt="image" src="https://github.com/user-attachments/assets/8230662f-8bbf-43ed-844a-62846e504c2c" />
+
 
 
 
