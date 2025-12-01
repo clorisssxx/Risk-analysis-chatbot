@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风控智库智能问答系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .user-message {
+            background: #007bff;
+            color: white;
+            border-radius: 18px 18px 5px 18px;
+            padding: 12px 18px;
+            margin: 10px 0;
+            max-width: 80%;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background: #f8f9fa;
+            color: #333;
+            border-radius: 18px 18px 18px 5px;
+            padding: 12px 18px;
+            margin: 10px 0;
+            max-width: 80%;
+            border: 1px solid #e9ecef;
+        }
+        
+        .message-time {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        
+        .example-question {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .example-question:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .loading {
+            opacity: 0.6;
+        }
+        
+        .confidence-badge {
+            font-size: 0.7em;
+            margin-left: 10px;
+        }
+        
+        .data-table {
+            width: 100%;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        
+        .data-table table {
+            width: 100% !important;
+            margin: 10px 0;
+        }
+        
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .profit-loss-result, .funds-result, .holding-result {
+            margin-bottom: 10px;
+        }
+        
+        .table-section {
+            margin-top: 15px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+        }
+        
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+		
+		/* 定时任务卡片样式 */
+		.schedule-card {
+			border: 1px solid #e0e0e0;
+			border-radius: 10px;
+			margin: 10px 0;
+			background: white;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+			transition: all 0.3s ease;
+		}
+
+		.schedule-card:hover {
+			box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+			transform: translateY(-2px);
+		}
+
+		.schedule-header {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			color: white;
+			padding: 12px 15px;
+			border-radius: 10px 10px 0 0;
+			font-weight: bold;
+		}
+
+		.schedule-body {
+			padding: 15px;
+		}
+
+		.schedule-item {
+			display: flex;
+			justify-content: space-between;
+			padding: 8px 0;
+			border-bottom: 1px solid #f0f0f0;
+		}
+
+		.schedule-item:last-child {
+			border-bottom: none;
+		}
+
+		.schedule-label {
+			font-weight: 600;
+			color: #555;
+			min-width: 100px;
+		}
+
+		.schedule-value {
+			color: #333;
+			flex: 1;
+			text-align: right;
+		}
+
+		/* 时间表特殊样式 */
+		.time-schedule {
+			background: #f8f9fa;
+			border-radius: 5px;
+			padding: 10px;
+			margin-top: 5px;
+		}
+
+		.time-item {
+			display: inline-block;
+			background: #007bff;
+			color: white;
+			padding: 3px 8px;
+			margin: 2px;
+			border-radius: 3px;
+			font-size: 0.85em;
+		}
+
+		/* 数据集容器 */
+		.dataset-container {
+			margin: 15px 0;
+		}
+
+		.dataset-section {
+			margin-bottom: 20px;
+		}
+
+		.section-title {
+			font-size: 1.1em;
+			font-weight: 600;
+			color: #495057;
+			margin-bottom: 10px;
+			padding-bottom: 5px;
+			border-bottom: 2px solid #007bff;
+		}
+
+		/* 响应式表格 */
+		.responsive-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 10px 0;
+			font-size: 0.9em;
+		}
+
+		.responsive-table th {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			color: white;
+			padding: 12px 8px;
+			text-align: left;
+			font-weight: 600;
+		}
+
+		.responsive-table td {
+			padding: 10px 8px;
+			border-bottom: 1px solid #e9ecef;
+		}
+
+		.responsive-table tr:nth-child(even) {
+			background-color: #f8f9fa;
+		}
+
+		.responsive-table tr:hover {
+			background-color: #e3f2fd;
+		}
+
+		/* 数据统计卡片 */
+		.data-stats {
+			display: flex;
+			justify-content: space-around;
+			margin: 15px 0;
+			flex-wrap: wrap;
+		}
+
+		.stat-card {
+			background: white;
+			border-radius: 8px;
+			padding: 15px;
+			margin: 5px;
+			flex: 1;
+			min-width: 120px;
+			text-align: center;
+			box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+			border-left: 4px solid #007bff;
+		}
+
+		.stat-value {
+			font-size: 1.5em;
+			font-weight: bold;
+			color: #007bff;
+		}
+
+		.stat-label {
+			font-size: 0.85em;
+			color: #6c757d;
+			margin-top: 5px;
+		}
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <!-- 标题 -->
+                <div class="text-center text-white mb-4">
+                    <h1 class="display-5 fw-bold">
+                        <i class="fas fa-robot me-2"></i>风控智库智能问答系统
+                    </h1>
+                </div>
+                
+                <!-- 聊天区域 -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-comments me-2"></i>智能对话
+                        <span id="status-indicator" class="badge bg-success float-end">
+                            <i class="fas fa-circle me-1"></i>系统就绪
+                        </span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- 聊天消息容器 -->
+                        <div id="chat-messages" class="chat-container">
+                            <div class="bot-message">
+                                <strong><i class="fas fa-robot me-2"></i>系统助手</strong>
+                                <div>您好！我是风控智库助手，可以为您解答以下问题：</div>
+                                <ul class="mt-2 mb-0">
+                                    <li>定时任务相关信息查询</li>
+                                    <li>帆软表数据查询</li>
+                                    <li>期货品种持仓情况</li>
+                                    <li>账户盈亏查询（日/月/年）</li>
+                                    <li>账户资金查询</li>
+                                </ul>
+                                <div class="message-time">欢迎提问！</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 示例问题 -->
+                        <div class="mb-3">
+                            <small class="text-muted">试试这些问题：</small>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <span class="example-question badge bg-light text-dark p-2" 
+                                      onclick="setExample(this)">定时任务现货盈亏</span>
+                                <span class="example-question badge bg-light text-dark p-2" 
+                                      onclick="setExample(this)">白糖2025-07-24的持仓情况</span>
+                                <span class="example-question badge bg-light text-dark p-2" 
+                                      onclick="setExample(this)">帆软表日结算汇总查询</span>
+                                <span class="example-question badge bg-light text-dark p-2" 
+                                      onclick="setExample(this)">期现产业2025-10-09的日盈亏</span>
+                                <span class="example-question badge bg-light text-dark p-2" 
+                                      onclick="setExample(this)">期现产业2025-10的月盈亏</span>
+                                <span class="example-question badge bg-light text-dark p-2" 
+                                      onclick="setExample(this)">期现产业2025的年盈亏</span>
+                                <span class="example-question badge bg-light text-dark p-2" 
+                                      onclick="setExample(this)">产业组合2025-10-09的账户资金</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 输入区域 -->
+                        <div class="input-group">
+                            <input type="text" id="question-input" 
+                                   class="form-control" 
+                                   placeholder="请输入您的问题..." 
+                                   autocomplete="off"
+                                   onkeypress="if(event.key === 'Enter') askQuestion()">
+                            <button id="ask-button" class="btn btn-primary" onclick="askQuestion()">
+                                <i class="fas fa-paper-plane me-1"></i>发送
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 页脚 -->
+                <div class="text-center text-white mt-4">
+                    <small>风控智库 &copy; 2025 - 智能问答系统</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 设置示例问题
+        function setExample(element) {
+            document.getElementById('question-input').value = element.textContent;
+            document.getElementById('question-input').focus();
+        }
+        
+        // 添加消息到聊天区域
+        function addMessage(content, isUser = false) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            if (isUser) {
+                messageDiv.className = 'user-message';
+                messageDiv.innerHTML = `
+                    <div>${content}</div>
+                    <div class="message-time">${timestamp}</div>
+                `;
+            } else {
+                messageDiv.className = 'bot-message';
+                messageDiv.innerHTML = `
+                    <strong><i class="fas fa-robot me-1"></i>系统助手</strong>
+                    <div>${content}</div>
+                    <div class="message-time">${timestamp}</div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 发送问题到后端
+        async function askQuestion() {
+            const input = document.getElementById('question-input');
+            const button = document.getElementById('ask-button');
+            const question = input.value.trim();
+            
+            if (!question) {
+                alert('请输入问题内容');
+                return;
+            }
+            
+            // 禁用输入和按钮
+            input.disabled = true;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>思考中...';
+            
+            // 显示用户问题
+            addMessage(question, true);
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                const data = await response.json();
+			
+		
+				
+                if (data.status === 'success') {
+                    let answerContent = '';
+                    
+                    // 根据问题类型格式化显示
+                    if (data.question_type === 'profit_loss') {
+						answerContent = `
+							<div class="profit-loss-result">
+								<strong>${data.portfolio || '默认组合'} ${data.query_type === 'daily' ? '日' : data.query_type === 'monthly' ? '月' : '年'}盈亏查询结果：</strong><br>
+								${data.answer || data.message || '暂无详细信息'}
+								${data.total_profit_loss !== undefined ? `<br>盈亏金额: <span class="badge ${data.profit_status === '盈利' ? 'bg-success' : data.profit_status === '亏损' ? 'bg-danger' : 'bg-secondary'}">${data.total_profit_loss}</span>` : ''}
+							</div>
+						`;
+					} else if (data.question_type === 'funds') {
+                        answerContent = `
+                            <div class="funds-result">
+                                <strong>${data.portfolio} 资金查询结果：</strong><br>
+                                ${data.answer}
+                                ${data.available_funds ? `<br><span class="badge bg-info">可用资金: ${parseFloat(data.available_funds).toLocaleString()}元</span>` : ''}
+                            </div>
+                        `;
+                    } else if (data.question_type === 'holding') {
+                        answerContent = `
+                            <div class="holding-result">
+                                <strong>${data.variety} 持仓查询结果：</strong><br>
+                                ${data.answer}
+                            </div>
+                        `;
+                    } else {
+                        // 普通知识库回答
+                        answerContent = data.answer;
+                        if (data.confidence) {
+                            answerContent += ` <span class="confidence-badge badge bg-info">置信度: ${data.confidence}</span>`;
+                        }
+                    }
+                    
+                    // 添加表格数据
+                    if (data.data_html) {
+                        answerContent += `
+                            <div class="table-section">
+                                <div class="table-title">详细数据：</div>
+                                <div class="data-table">${data.data_html}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    if (data.further_answer_html) {
+                        answerContent += `
+                            <div class="table-section">
+                                <div class="table-title">补充信息：</div>
+                                <div class="data-table">${data.further_answer_html}</div>
+                            </div>
+                        `;
+                    } else if (data.further_answer) {
+                        answerContent += `
+                            <div class="table-section">
+                                <div class="table-title">补充信息：</div>
+                                <div>${data.further_answer}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    addMessage(answerContent);
+                } else {
+                    addMessage(`抱歉：${data.message}`);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('网络连接失败，请稍后重试');
+            } finally {
+                // 恢复输入和按钮
+                input.disabled = false;
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-paper-plane me-1"></i>发送';
+                input.focus();
+            }
+        }
+        
+        // 检查系统状态
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                const indicator = document.getElementById('status-indicator');
+                
+                if (data.knowledge_base_ready) {
+                    indicator.innerHTML = '<i class="fas fa-circle me-1"></i>系统就绪';
+                    indicator.className = 'badge bg-success float-end';
+                } else {
+                    indicator.innerHTML = '<i class="fas fa-circle me-1"></i>初始化中';
+                    indicator.className = 'badge bg-warning float-end';
+                }
+            } catch (error) {
+                console.error('Status check failed:', error);
+                const indicator = document.getElementById('status-indicator');
+                indicator.innerHTML = '<i class="fas fa-circle me-1"></i>连接失败';
+                indicator.className = 'badge bg-danger float-end';
+            }
+        }
+		
+		// 添加这些函数到现有的script标签中
+
+		// 美化定时任务数据显示
+		function formatScheduleData(data) {
+			if (!data || data.length === 0) {
+				return '<div class="text-muted">暂无定时任务数据</div>';
+			}
+
+			let html = '<div class="dataset-container">';
+			
+			data.forEach((item, index) => {
+				html += `
+				<div class="schedule-card">
+					<div class="schedule-header">
+						<i class="fas fa-clock me-2"></i>定时任务 ${index + 1}
+					</div>
+					<div class="schedule-body">
+				`;
+				
+				// 动态生成每个字段的显示
+				Object.keys(item).forEach(key => {
+					let value = item[key];
+					let displayValue = value;
+					
+					// 特殊处理时间字段
+					if (key.includes('时间') || key.includes('定时')) {
+						displayValue = `<div class="time-schedule">${formatTimeSchedule(value)}</div>`;
+					}
+					
+					// 特殊处理状态字段
+					if (key.includes('状态') || key.includes('延误')) {
+						const statusClass = value === '正常' ? 'bg-success' : 'bg-warning';
+						displayValue = `<span class="badge ${statusClass}">${value}</span>`;
+					}
+					
+					html += `
+					<div class="schedule-item">
+						<span class="schedule-label">${formatFieldName(key)}：</span>
+						<span class="schedule-value">${displayValue}</span>
+					</div>
+					`;
+				});
+				
+				html += `</div></div>`;
+			});
+			
+			html += '</div>';
+			return html;
+		}
+
+		// 格式化时间表
+		function formatTimeSchedule(timeStr) {
+			if (!timeStr) return '未设置';
+			
+			// 假设时间格式为 "每日15:00,15:30,16:00..."
+			const times = timeStr.split(',').filter(t => t.trim());
+			
+			if (times.length === 0) return timeStr;
+			
+			return times.map(time => 
+				`<span class="time-item">${time.trim()}</span>`
+			).join('');
+		}
+
+		// 格式化字段名（中文显示）
+		function formatFieldName(fieldName) {
+			const fieldMap = {
+				'计划': '计划类型',
+				'日期': '执行日期',
+				'定程': '定程设置',
+				'时序': '时间序列',
+				'类名': '任务类别',
+				'型称': '模型名称',
+				'名称': '任务名称',
+				'定时时间': '执行时间',
+				'远程电脑定时': '远程执行'
+			};
+			
+			return fieldMap[fieldName] || fieldName;
+		}
+
+		// 美化普通表格数据
+		function formatTableData(data, title = '数据查询结果') {
+			if (!data || data.length === 0) {
+				return '<div class="text-muted">暂无数据</div>';
+			}
+
+			let html = `
+			<div class="dataset-section">
+				<div class="section-title">${title}</div>
+				<table class="responsive-table">
+					<thead>
+						<tr>
+			`;
+			
+			// 表头
+			Object.keys(data[0]).forEach(key => {
+				html += `<th>${formatFieldName(key)}</th>`;
+			});
+			
+			html += `</tr></thead><tbody>`;
+			
+			// 表格内容
+			data.forEach(row => {
+				html += '<tr>';
+				Object.values(row).forEach(value => {
+					// 特殊处理数值和状态
+					let displayValue = value;
+					if (typeof value === 'number') {
+						displayValue = value.toLocaleString();
+					} else if (value === null || value === undefined) {
+						displayValue = '<span class="text-muted">-</span>';
+					}
+					
+					html += `<td>${displayValue}</td>`;
+				});
+				html += '</tr>';
+			});
+			
+			html += `</tbody></table></div>`;
+			
+			// 添加数据统计
+			html += generateDataStats(data);
+			
+			return html;
+		}
+
+		// 生成数据统计信息
+		function generateDataStats(data) {
+			if (!data || data.length === 0) return '';
+			
+			const totalRecords = data.length;
+			const columns = Object.keys(data[0]).length;
+			
+			return `
+			<div class="data-stats">
+				<div class="stat-card">
+					<div class="stat-value">${totalRecords}</div>
+					<div class="stat-label">总记录数</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value">${columns}</div>
+					<div class="stat-label">字段数量</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value">${new Date().toLocaleDateString()}</div>
+					<div class="stat-label">查询时间</div>
+				</div>
+			</div>
+			`;
+		}
+        
+        // 页面加载时检查状态
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemStatus();
+            // 每30秒检查一次状态
+            setInterval(checkSystemStatus, 30000);
+            
+            // 输入框自动聚焦
+            document.getElementById('question-input').focus();
+        });
+    </script>
+</body>
+</html>
